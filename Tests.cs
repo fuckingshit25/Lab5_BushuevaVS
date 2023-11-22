@@ -1,8 +1,10 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using NUnit.Framework;
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Лаб5
 {
@@ -30,9 +32,8 @@ namespace Лаб5
             calculatorPage.SelectOperation("+");
             calculatorPage.EnterValueB("3");
             calculatorPage.IncrementB();
-            calculatorPage.ClickCalculateButton();
 
-            Assert.AreEqual("6", calculatorPage.GetResult());
+            Assert.AreEqual("5", calculatorPage.GetResult());
         }
 
         [Test]
@@ -43,9 +44,8 @@ namespace Лаб5
             calculatorPage.SelectOperation("-");
             calculatorPage.EnterValueB("3");
             calculatorPage.DecrementB();
-            calculatorPage.ClickCalculateButton();
 
-            Assert.AreEqual("1", calculatorPage.GetResult());
+            Assert.AreEqual("2", calculatorPage.GetResult());
         }
 
         [Test]
@@ -56,24 +56,75 @@ namespace Лаб5
             calculatorPage.SelectOperation("*");
             calculatorPage.EnterValueB("3");
             calculatorPage.IncrementB();
-            calculatorPage.ClickCalculateButton();
-
-            Assert.AreEqual("15", calculatorPage.GetResult());
+            Assert.AreEqual("20", calculatorPage.GetResult());
         }
 
         [Test]
         public void DivisionTest()
         {
-            calculatorPage.EnterValueA("10");
+            calculatorPage.EnterValueA("5");
+            calculatorPage.IncrementA();
+            calculatorPage.EnterValueB("2");
+            calculatorPage.SelectOperation("/");
+
+            Assert.AreEqual("3", calculatorPage.GetResult());
+        }
+        [Test]
+        public void NullTest()
+        {
+            calculatorPage.EnterValueA("5");
+            calculatorPage.EnterValueB("0");
+            calculatorPage.SelectOperation("/");
+
+            Assert.AreEqual("null", calculatorPage.GetResult());
+        }
+        [Test]
+        public void NegativeTest()
+        {
+            calculatorPage.EnterValueA("5");
+            calculatorPage.EnterValueB("-5");
+            calculatorPage.DecrementB();
+            calculatorPage.SelectOperation("+");
+
+            Assert.AreEqual("-1", calculatorPage.GetResult());
+        }
+        [Test]
+        public void NegativeTest2()
+        {
+            calculatorPage.EnterValueA("-10");
             calculatorPage.DecrementA();
+            calculatorPage.EnterValueB("5");
+            calculatorPage.SelectOperation("+");
+
+            Assert.AreEqual("-6", calculatorPage.GetResult());
+        }
+        [Test]
+        public void DecimalDivisionTest()
+        {
+            calculatorPage.EnterValueA("7");
+            calculatorPage.SelectOperation("/");
+            calculatorPage.EnterValueB("3");
+
+            Assert.AreEqual("2.3333333333333335", calculatorPage.GetResult());
+        }
+        [Test]
+        public void doubleTest()
+        {
+            calculatorPage.EnterValueA("5");
             calculatorPage.SelectOperation("/");
             calculatorPage.EnterValueB("2");
-            calculatorPage.DecrementB();
-            calculatorPage.ClickCalculateButton();
 
-            Assert.AreEqual("4", calculatorPage.GetResult());
+            Assert.AreEqual("2.5", calculatorPage.GetResult());
         }
+        [Test]
+        public void doubleTest2()
+        {
+            calculatorPage.EnterValueA("10.5");
+            calculatorPage.SelectOperation("/");
+            calculatorPage.EnterValueB("1.2");
 
+            Assert.AreEqual("8.75", calculatorPage.GetResult());
+        }
         [TearDown]
         public void TearDown()
         {
@@ -92,7 +143,7 @@ namespace Лаб5
         private IWebElement DecrementBButton => driver.FindElement(By.XPath("//button[@ng-click='decb()']"));
         private IWebElement OperationSelect => driver.FindElement(By.XPath("//select[@ng-model='operation']"));
         private IWebElement CalculateButton => driver.FindElement(By.XPath("//button[@class='command']"));
-        private IWebElement Result => driver.FindElement(By.XPath("//b[@class='result']"));
+        private IWebElement Result => driver.FindElement(By.XPath("//b[contains(@class, 'result')]"));
 
         public CalculatorPage(IWebDriver driver)
         {
@@ -137,14 +188,13 @@ namespace Лаб5
             select.SelectByText(operation);
         }
 
-        public void ClickCalculateButton()
-        {
-            CalculateButton.Click();
-        }
 
         public string GetResult()
         {
-            return Result.Text;
+            string resultText = Result.Text;
+            string[] parts = resultText.Split('=');
+            string numericResult = parts[1].Trim();
+            return numericResult;
         }
     }
 }
