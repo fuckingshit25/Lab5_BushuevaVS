@@ -33,7 +33,7 @@ namespace Лаб5
             calculatorPage.EnterValueB("3");
             calculatorPage.IncrementB();
 
-            Assert.AreEqual("5", calculatorPage.GetResult());
+            Assert.AreEqual("7", calculatorPage.GetResult());
         }
 
         [Test]
